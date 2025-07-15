@@ -21,10 +21,13 @@ exports.addWorkout = async (req, res) => {
 // Get my workouts
 exports.getMyWorkouts = async (req, res) => {
   try {
-    const workouts = await Workout.find({ userId: req.user.id });
-    if (workouts.length === 0) {
+    console.log("🔐 Logged-in User ID:", req.user.id); // 👈 Add this
+    const workouts = await Workout.find({ userId: req.user.id }).sort({ dateAdded: -1 });
+
+    if (!workouts.length) {
       return res.status(404).json({ message: "No workouts found" });
     }
+
     res.status(200).json({ workouts });
   } catch (err) {
     console.error("❌ Get Workouts Error:", err);
