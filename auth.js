@@ -17,39 +17,28 @@ module.exports.createAccessToken = (user) => {
 //[SECTION] Token Verification
 
 module.exports.verify = (req, res, next) => {
-    console.log(req.headers.authorization);
+  let token = req.headers.authorization;
 
-    let token = req.headers.authorization;
+  if (typeof token === "undefined") {
+    return res.status(401).json({ auth: "Failed. No Token" });
+  } else {
+    // ✅ Clean token
+    token = token.replace("Bearer ", "");
 
-    if(typeof token === "undefined"){
-        return res.send({ auth: "Failed. No Token" });
-    } else {
-        console.log(token);
-        //Bearer Token ejdlaskfndlskfjlksd
-        token = token.slice(7, token.lenght);
-        console.log(token);
-
-
-        //[SECTION] Token decryption
-
-        jwt.verify(token, JWT_SECRET_KEY, function(err, decodedToken){
-            if(err) {
-                return res.send({
-                    auth: "Failed",
-                    message: err.message
-                });
-            } else {
-                console.log("Result from verify method:")
-                console.log(decodedToken);
-
-                req.user = decodedToken;
-
-                next();
-            }
-        })
-
-    }
-}
+    // 🔐 Verify token
+    jwt.verify(token, JWT_SECRET_KEY, function (err, decodedToken) {
+      if (err) {
+        return res.status(401).json({
+          auth: "Failed",
+          message: err.message,
+        });
+      } else {
+        req.user = decodedToken;
+        next();
+      }
+    });
+  }
+};
 
 
 //[SECTION] Verify Admin
